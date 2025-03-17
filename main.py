@@ -25,6 +25,25 @@ class DPE(Base):
     dpe_note = Column(String)
     consommation_energie = Column(Float)
 
+import requests  # Pour appeler l'API ADEME
+
+ADEME_API_URL = "https://data.ademe.fr/api/records/1.0/search/"
+
+def get_dpe_from_ademe(numero_dpe: str):
+    """Requête vers l'API ADEME pour récupérer un DPE existant."""
+    params = {
+        "dataset": "dpe-logements",  # Nom du dataset ADEME
+        "q": f"numero_dpe:{numero_dpe}"  # Recherche par numéro de DPE
+    }
+    
+    response = requests.get(ADEME_API_URL, params=params)
+    
+    if response.status_code == 200:
+        data = response.json()
+        if "records" in data and len(data["records"]) > 0:
+            return data["records"][0]["fields"]  # Retourne les infos du premier DPE trouvé
+    return None  # Aucun DPE trouvé
+
 # Modèle pour les travaux et leur coût estimé
 class Travaux(Base):
     __tablename__ = "travaux"
